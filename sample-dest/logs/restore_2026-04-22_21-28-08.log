@@ -1,0 +1,5 @@
+[2026-04-22 21:28:08] === RESTORE START ===
+[2026-04-22 21:28:08] Config file: /Users/danielbaranowski/Workspace/simple-backup-restore-script/backup.conf
+[2026-04-22 21:28:08] Backup directory: ./sample-dest
+[2026-04-22 21:28:08] .gitignore filtering: true
+[2026-04-22 21:28:08] No backups found in: ./sample-dest

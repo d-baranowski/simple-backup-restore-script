@@ -75,7 +75,7 @@ reset_data() {
   echo other  > /tmp/sample_source_2/other.txt
 }
 
-chmod +x backup.sh restore.sh
+chmod +x backup.sh
 
 section "help"
 out=$(./backup.sh -h)
@@ -184,5 +184,65 @@ reset_data
 ./backup.sh -s /tmp/sample_source -d /tmp/sample_dest -v >/dev/null
 log=$(find /tmp/sample_dest/logs -name 'backup_*.log' | head -1)
 file_exists "$log" "per-run log file created"
+
+section "list mode"
+reset_data
+./backup.sh -s /tmp/sample_source -d /tmp/sample_dest >/dev/null
+sleep 1
+./backup.sh -s /tmp/sample_source -d /tmp/sample_dest >/dev/null
+out=$(./backup.sh --list -d /tmp/sample_dest)
+contains "$out" "Available backups in /tmp/sample_dest" "list header"
+contains "$out" "(2 total)"                              "list counts archives"
+contains "$out" "SIZE"                                   "list shows SIZE column"
+contains "$out" "DATE"                                   "list shows DATE column"
+listed=$(echo "$out" | grep -c 'backup_.*\.tar\.gz' || true)
+equals "$listed" "2" "list prints both archive rows"
+
+section "list mode: empty directory"
+rm -rf /tmp/sample_dest && mkdir -p /tmp/sample_dest
+out=$(./backup.sh -l -d /tmp/sample_dest)
+contains "$out" "No backups found" "empty list message"
+
+section "restore: -a + -d with absolute paths"
+reset_data
+./backup.sh -s /tmp/sample_source -d /tmp/sample_dest >/dev/null
+archive=$(find /tmp/sample_dest -maxdepth 1 -name 'backup_*.tar.gz' | head -1)
+rm -rf /tmp/restore_abs
+./backup.sh --restore --archive "$archive" --destination /tmp/restore_abs >/dev/null
+file_exists "/tmp/restore_abs/tmp/sample_source/file.txt"       "absolute -d: top-level file restored"
+file_exists "/tmp/restore_abs/tmp/sample_source/sub/nested.txt" "absolute -d: nested file restored"
+
+section "restore: -d with relative path (creates directory)"
+reset_data
+./backup.sh -s /tmp/sample_source -d /tmp/sample_dest >/dev/null
+archive=$(find /tmp/sample_dest -maxdepth 1 -name 'backup_*.tar.gz' | head -1)
+rm -rf /tmp/restore_rel_cwd && mkdir -p /tmp/restore_rel_cwd
+( cd /tmp/restore_rel_cwd && "$SCRIPT_DIR/backup.sh" -r -a "$archive" -d ./nested_out >/dev/null )
+file_exists "/tmp/restore_rel_cwd/nested_out/tmp/sample_source/file.txt" "relative -d resolves against CWD and is created"
+
+section "restore: -a bare filename (looked up in BACKUP_ROOT from config)"
+reset_data
+./backup.sh -s /tmp/sample_source -d /tmp/sample_dest >/dev/null
+archive_base=$(basename "$(find /tmp/sample_dest -maxdepth 1 -name 'backup_*.tar.gz' | head -1)")
+rm -rf /tmp/restore_bare
+./backup.sh -r -a "$archive_base" -d /tmp/restore_bare >/dev/null
+file_exists "/tmp/restore_bare/tmp/sample_source/file.txt" "bare filename resolved via config BACKUP_ROOT"
+
+section "restore: nonexistent archive"
+run_expect 1 "nonexistent archive rejected" ./backup.sh -r -a /does/not/exist.tar.gz -d /tmp/restore_x
+
+section "mode flag exclusivity"
+run_expect 1 "-s in restore mode rejected" ./backup.sh -r -s /tmp/sample_source
+run_expect 1 "-a in backup mode rejected"  ./backup.sh -a /tmp/foo.tar.gz
+
+section "round-trip: backup, wipe source, restore to original path"
+reset_data
+./backup.sh -s /tmp/sample_source -d /tmp/sample_dest >/dev/null
+archive=$(find /tmp/sample_dest -maxdepth 1 -name 'backup_*.tar.gz' | head -1)
+rm -rf /tmp/sample_source
+# No -d: config-driven restore into original BACKUP_SOURCES paths
+./backup.sh -r -a "$archive" >/dev/null
+file_exists "/tmp/sample_source/file.txt"       "round-trip: top-level file restored"
+file_exists "/tmp/sample_source/sub/nested.txt" "round-trip: nested file restored"
 
 printf '\n%s%d passed, %d failed%s\n' "$C_SECT" "$PASS" "$FAIL" "$C_RESET"

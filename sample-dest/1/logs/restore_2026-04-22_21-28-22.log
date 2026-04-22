@@ -1,0 +1,9 @@
+[2026-04-22 21:28:22] === RESTORE START ===
+[2026-04-22 21:28:22] Config file: /Users/danielbaranowski/Workspace/simple-backup-restore-script/backup.conf
+[2026-04-22 21:28:22] Backup directory: ./sample-dest/1
+[2026-04-22 21:28:22] .gitignore filtering: true
+[2026-04-22 21:28:26] Selected backup: ./sample-dest/1/backup_mac_2026-04-22_21-26-28.tar.gz
+[2026-04-22 21:28:26] Extracting archive into temporary directory: /var/folders/rt/1gd1463s5snbt5ssw0k1nh180000gn/T/tmp.sBJH9q25Gw
+[2026-04-22 21:28:26] Archive extracted successfully
+[2026-04-22 21:28:26] Skipped ./sample-source - not present in archive
+[2026-04-22 21:28:26] === RESTORE END ===

@@ -1,0 +1,10 @@
+[2026-04-22 21:28:59] [INFO] === BACKUP START ===
+[2026-04-22 21:28:59] [INFO] Config file: /Users/danielbaranowski/Workspace/simple-backup-restore-script/backup.conf
+[2026-04-22 21:28:59] [INFO] Backup directory: ./sample-dest/2
+[2026-04-22 21:28:59] [INFO] Retention limit: 2
+[2026-04-22 21:28:59] [INFO] .gitignore filtering: true
+[2026-04-22 21:28:59] [INFO] Staged for archiving: ./sample-source
+[2026-04-22 21:28:59] [INFO] Creating archive: ./sample-dest/2/backup_mac_2026-04-22_21-28-59.tar.gz
+[2026-04-22 21:28:59] [INFO] Backup created successfully: ./sample-dest/2/backup_mac_2026-04-22_21-28-59.tar.gz (4.0K)
+[2026-04-22 21:28:59] [INFO] Pruning backups above retention limit: 2
+[2026-04-22 21:28:59] [INFO] === BACKUP END ===
